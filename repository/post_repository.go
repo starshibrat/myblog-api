@@ -13,6 +13,7 @@ type PostRepository interface {
 	Create(ctx context.Context, data *model.Post) (interface{}, error)
 	DeleteById(ctx context.Context, data *model.PostId, authorId string) (interface{}, error)
 	GetAllPost(ctx context.Context) (interface{}, error)
+	GetPostById(ctx context.Context, data *model.PostId) (interface{}, error)
 }
 
 type postRepository struct {
@@ -108,9 +109,40 @@ func (r *postRepository) GetAllPost(ctx context.Context) (interface{}, error) {
 
 	db := client.Database("myblog")
 
-	var posts []model.Post
+	stages := bson.A{
+		bson.D{
+			{"$lookup",
+				bson.D{
+					{"from", "user"},
+					{"localField", "author_id"},
+					{"foreignField", "_id"},
+					{"as", "author"},
+				},
+			},
+		},
+		bson.D{
+			{"$unwind",
+				bson.D{
+					{"path", "$author"},
+					{"includeArrayIndex", "string"},
+					{"preserveNullAndEmptyArrays", false},
+				},
+			},
+		},
+		bson.D{{"$addFields", bson.D{{"author_name", "$author.username"}}}},
+		bson.D{
+			{"$project",
+				bson.D{
+					{"author", 0},
+					{"string", 0},
+				},
+			},
+		},
+	}
 
-	cur, err := db.Collection("posts").Find(ctx, bson.D{{}})
+	var posts []model.PostResponse
+
+	cur, err := db.Collection("posts").Aggregate(ctx, stages)
 
 	if err != nil {
 		log.Printf("error: %v", err)
@@ -118,7 +150,7 @@ func (r *postRepository) GetAllPost(ctx context.Context) (interface{}, error) {
 	}
 
 	for cur.Next(ctx) {
-		var elem model.Post
+		var elem model.PostResponse
 		err := cur.Decode(&elem)
 
 		if err != nil {
@@ -134,6 +166,81 @@ func (r *postRepository) GetAllPost(ctx context.Context) (interface{}, error) {
 	}
 
 	return posts, nil
+}
+
+func (r *postRepository) GetPostById(ctx context.Context, data *model.PostId) (interface{}, error) {
+	client, err := r.store.GetClient()
+
+	if err != nil {
+		log.Printf("error: %v", err)
+		return nil, err
+	}
+
+	coll := client.Database("myblog").Collection("posts")
+
+	objId, err := bson.ObjectIDFromHex(data.Id)
+
+	if err != nil {
+		log.Printf("error: %v", err)
+		return nil, err
+	}
+
+	stages :=
+
+		bson.A{
+			bson.D{{"$match", bson.D{{"_id", objId}}}},
+			bson.D{
+				{"$lookup",
+					bson.D{
+						{"from", "user"},
+						{"localField", "author_id"},
+						{"foreignField", "_id"},
+						{"as", "author"},
+					},
+				},
+			},
+			bson.D{
+				{"$unwind",
+					bson.D{
+						{"path", "$author"},
+						{"includeArrayIndex", "string"},
+						{"preserveNullAndEmptyArrays", false},
+					},
+				},
+			},
+			bson.D{{"$addFields", bson.D{{"author_name", "$author.username"}}}},
+			bson.D{
+				{"$project",
+					bson.D{
+						{"string", 0},
+						{"author", 0},
+					},
+				},
+			},
+			bson.D{{"$limit", 1}},
+		}
+
+	res, err := coll.Aggregate(ctx, stages)
+
+	if err != nil {
+		log.Printf("error: %v", err)
+		return nil, err
+	}
+
+	var post model.PostResponse
+
+	for res.Next(ctx) {
+		err := res.Decode(&post)
+
+		if err != nil {
+			log.Printf("error: %v", err)
+			return nil, err
+		}
+	}
+	if err := res.Err(); err != nil {
+		return nil, err
+	}
+	return post, nil
 
 }
 

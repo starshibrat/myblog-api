@@ -77,3 +77,22 @@ func Get_All_Posts(repo repository.PostRepository) gin.HandlerFunc {
 		c.JSON(http.StatusOK, res)
 	}
 }
+
+func Get_post_by_id(repo repository.PostRepository) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var postId model.PostId
+		if err := c.ShouldBind(&postId); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		res, err := repo.GetPostById(context.TODO(), &postId)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, res)
+	}
+}

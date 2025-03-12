@@ -17,6 +17,14 @@ type Post struct {
 	CreatedAt time.Time     `form:"created_at" bson:"created_at"`
 }
 
+type PostResponse struct {
+	Id         bson.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	AuthorId   bson.ObjectID `form:"author_id" bson:"author_id" binding:"required"`
+	Content    string        `form:"content" bson:"content" binding:"required"`
+	CreatedAt  time.Time     `form:"created_at" bson:"created_at"`
+	AuthorName string        `form:"author_name" bson:"author_name"`
+}
+
 type PostId struct {
 	Id string `form:"id" json:"id" binding:"required"`
 }

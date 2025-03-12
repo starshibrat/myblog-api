@@ -43,6 +43,7 @@ func Init() {
 	router.POST("/new_post", handler.AuthenticateJwt(), handler.Create_new_post_handler(post_repo))
 	router.DELETE("/post", handler.AuthenticateJwt(), handler.Delete_post_by_id_handler(post_repo))
 	router.GET("/posts", handler.Get_All_Posts(post_repo))
+	router.GET("/post", handler.Get_post_by_id(post_repo))
 
 	s := &http.Server{
 		Addr:         ":8080",

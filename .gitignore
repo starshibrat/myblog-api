@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 .env
 blog-service-gin
 .github/
 fly.toml
+=======
+.env
+>>>>>>> parent of 76aea47 (change ip)

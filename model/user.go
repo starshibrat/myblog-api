@@ -1,17 +1,23 @@
 package model
 
-import "go.mongodb.org/mongo-driver/v2/bson"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
 
 type User struct {
-	Id       bson.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Username string        `json:"username"`
-	Password string        `json:"password"`
-	Email    string        `json:"email"`
+	Id        bson.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Username  string        `bson:"username"`
+	Password  string        `bson:"password"`
+	Email     string        `bson:"email"`
+	CreatedAt time.Time     `bson:"created_at"`
 }
 
 type UserResponse struct {
-	Id       bson.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Username string        `json:"username"`
+	Id        bson.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Username  string        `bson:"username"`
+	CreatedAt time.Time     `bson:"created_at"`
 }
 
 type UserId struct {

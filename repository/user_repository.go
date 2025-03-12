@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"example/blog-service-gin/model"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -76,6 +77,20 @@ func (r *userRepository) Register(ctx context.Context, data *model.Register) (in
 		return nil, err
 	}
 
+	var user model.User
+
+	err = client.Database("myblog").Collection("user").FindOne(ctx, bson.M{"username": data.Username}).Decode(&user)
+
+	if err == nil {
+		return nil, fmt.Errorf("username has already taken")
+	}
+
+	err = client.Database("myblog").Collection("user").FindOne(ctx, bson.M{"email": data.Email}).Decode(&user)
+
+	if err == nil {
+		return nil, fmt.Errorf("email has already taken")
+	}
+
 	h, err := bcrypt.GenerateFromPassword([]byte(data.Password), 12)
 
 	if err != nil {
@@ -85,7 +100,14 @@ func (r *userRepository) Register(ctx context.Context, data *model.Register) (in
 
 	data.Password = string(h)
 
-	res, err := client.Database("myblog").Collection("user").InsertOne(ctx, data)
+	new_user := model.User{
+		Username:  data.Username,
+		Password:  data.Password,
+		Email:     data.Email,
+		CreatedAt: time.Now(),
+	}
+
+	res, err := client.Database("myblog").Collection("user").InsertOne(ctx, new_user)
 
 	if err != nil {
 		return nil, err
@@ -114,7 +136,6 @@ func (r *userRepository) AllUsers(ctx context.Context) (interface{}, error) {
 	for res.Next(ctx) {
 		var elem model.UserResponse
 		err := res.Decode(&elem)
-		log.Printf("%v\n", elem.Username)
 		if err != nil {
 			return nil, err
 		}

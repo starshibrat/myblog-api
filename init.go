@@ -47,7 +47,7 @@ func Init() {
 	router.GET("/post", handler.Get_post_by_id(post_repo))
 
 	s := &http.Server{
-		Addr:         ":8080",
+		Addr:         "0.0.0.0:8080",
 		Handler:      router,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,

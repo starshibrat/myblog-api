@@ -1,0 +1,27 @@
+# fly.toml app configuration file generated for blog-service-gin on 2025-03-12T22:44:10+07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'blog-service-gin'
+primary_region = 'sin'
+
+[build]
+  [build.args]
+    GO_VERSION = '1.24.0'
+
+[env]
+  PORT = '8080'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -70,6 +71,11 @@ func init_router() *gin.Engine {
 	}))
 
 	router.Use(gin.Recovery())
+
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+
+	router.Use(cors.New(config))
 	router.GET("/ping", func(c *gin.Context) {
 		c.String(200, "pong")
 	})

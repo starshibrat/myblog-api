@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -85,8 +86,9 @@ func init_router() *gin.Engine {
 }
 
 func init_client() (model.DbStore, error) {
+	uri := os.Getenv("MONGO_DB_URI")
 	clientOptions := options.Client().
-		ApplyURI("mongodb://localhost:27017")
+		ApplyURI(uri)
 
 	dbstore, err := model.NewDbStore(clientOptions)
 

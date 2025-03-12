@@ -40,6 +40,8 @@ func Init() {
 	router.DELETE("deleteUser", handler.AuthenticateJwt(), handler.Delete_user_by_id(user_repo))
 
 	router.POST("/new_post", handler.AuthenticateJwt(), handler.Create_new_post_handler(post_repo))
+	router.DELETE("/post", handler.AuthenticateJwt(), handler.Delete_post_by_id_handler(post_repo))
+	router.GET("/posts", handler.Get_All_Posts(post_repo))
 
 	s := &http.Server{
 		Addr:         ":8080",

@@ -34,7 +34,7 @@ func (r *userRepository) Login(ctx context.Context, data *model.Login) (interfac
 
 	var user model.User
 
-	filter := bson.M{}
+	filter := bson.M{"username": &data.Username}
 
 	err = client.Database("myblog").Collection("user").FindOne(ctx, filter).Decode(&user)
 
